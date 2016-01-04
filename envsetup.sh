@@ -18,6 +18,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
+- setup:   Get the required repos for supported device.
 
 Environemnt options:
 - SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
@@ -1402,6 +1403,21 @@ function godir () {
         pathname=${lines[0]}
     fi
     \cd $T/$pathname
+}
+
+function setup() {
+    DEVICES='build/devices'
+
+    if [[ "$1" =~ $(echo ^\($(paste -sd'|' $DEVICES)\)$) ]]; then
+        echo "Setting up repos for $1"
+        repo init -m $1.xml
+        repo sync -j 4
+    elif [[ "$1" = "" ]]; then
+        echo "Please specify a device codename. Supported devices are :"
+        cat $DEVICES
+    else
+        echo "The specified device is not supported."
+    fi
 }
 
 # Force JAVA_HOME to point to java 1.7 if it isn't already set.
